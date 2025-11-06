@@ -1,0 +1,18 @@
+FROM debian:stable-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates build-essential pkg-config \
+    libx11-dev libxft-dev libxrender-dev libxinerama-dev \
+    libharfbuzz-dev libfontconfig1-dev libfreetype6-dev \
+    dpkg-dev make git && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /src
+COPY . .
+
+# Build shared (static X11 linking generally not available by default)
+RUN make STATIC=0 && make deb STATIC=0 PKGVER=1.0.0 ARCH=amd64
+
+# Output: /src/dist/guii_1.0.0_amd64.deb
+
