@@ -16,7 +16,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config \
-            libx11-dev libx11 libxft-dev libxft2 libxrender-dev libxinerama-dev libxinerama1 \
+            libx11-dev libx11-6 libxft-dev libxft2 libxrender-dev libxinerama-dev libxinerama1 \
             libharfbuzz-dev gir1.2-harfbuzz-0.0 libfontconfig1-dev libfontconfig1 libfreetype6-dev libfreetype6 dpkg-dev
       - name: Build combined binary (shared)
         run: make STATIC=0
