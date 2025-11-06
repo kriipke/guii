@@ -30,17 +30,12 @@ ST_DEFS  = -Dmain=st_main  -Ddie=st_die
 
 # Sources per project
 DWM_SRC = \
-  $(MKFILEDIR)dwm/dwm.c \
-  $(MKFILEDIR)dwm/drw.c \
-  $(MKFILEDIR)dwm/util.c \
-  $(MKFILEDIR)dwm/transient.c
+  dwm/dwm.c
 
 ST_SRC = \
-  $(MKFILEDIR)st/st.c \
-  $(MKFILEDIR)st/x.c \
-  $(MKFILEDIR)st/hb.c
+  st/st.c
 
-WRAP_SRC = $(MKFILEDIR)combined/main.c
+WRAP_SRC = combined/main.c
 
 # Objects
 DWM_OBJ := $(DWM_SRC:.c=.o)
@@ -102,10 +97,13 @@ $(PKGNAME): $(DWM_OBJ) $(ST_OBJ) $(WRAP_OBJ)
 dwm/config.h: dwm/config.def.h
 	cp -f $< $@
 
+st/config.h: st/config.def.h
+	cp -f $< $@
+
 dwm/%.o: dwm/%.c dwm/config.h
 	$(CC) $(COMMON_CFLAGS) $(INCS_CLEANED) $(CFLAGS) $(DWM_DEFS) -c -o $@ $<
 
-st/%.o: st/%.c
+st/%.o: st/%.c st/config.h
 	$(CC) $(COMMON_CFLAGS) $(STCFLAGS) $(ST_DEFS) -c -o $@ $<
 
 combined/%.o: combined/%.c
@@ -113,6 +111,7 @@ combined/%.o: combined/%.c
 
 clean:
 	rm -f $(DWM_OBJ) $(ST_OBJ) $(WRAP_OBJ) $(PKGNAME)
+	rm -f dwm/config.h st/config.h
 	rm -rf build dist
 
 install: all

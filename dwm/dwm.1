@@ -1,0 +1,45 @@
+.TH IIWM 1 "October 2025" "guii 1.0.0" "User Commands"
+.SH NAME
+iiwm \- placeholder window manager used by guii
+.SH SYNOPSIS
+.B iiwm
+.RI [ options ]
+.SH DESCRIPTION
+The
+.B iiwm
+command is a lightweight stub that stands in for the real
+.BR dwm (1)
+implementation.  It is included so that the multicall wrapper in this
+repository can be compiled and packaged without requiring external
+source downloads.
+.PP
+When started, the program prints an informational banner followed by
+periodic heartbeat messages.  It exits cleanly when it receives
+.B SIGINT
+or
+.BR SIGTERM .
+.SH OPTIONS
+.TP
+.BR --help
+Show usage information and exit.
+.TP
+.BR --version
+Print the stub version and exit.
+.TP
+.BR --once
+Emit a single heartbeat message and terminate.
+.TP
+.BR --heartbeat " " SECONDS
+Override the delay between heartbeat log entries.  The default value is
+configured in
+.I config.h
+and defaults to five seconds.
+.SH FILES
+.TP
+.I config.h
+Automatically generated from
+.I config.def.h
+on the first build and holds local configuration values.
+.SH AUTHOR
+The stub iiwm implementation was written for the guii project to make
+its packaging self contained.
