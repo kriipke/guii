@@ -8,8 +8,9 @@ int st_main(int argc, char *argv[]);
 static int
 chain_exec(int (*fn)(int, char **), const char *progname, int argc, char **argv, int drop)
 {
-    if (drop > argc)
+    if (drop > argc) {
         drop = argc;
+    }
     argv += drop;
     argc -= drop;
 
