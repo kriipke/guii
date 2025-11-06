@@ -20,9 +20,41 @@ ARCH ?= amd64
 # Control static linking: set STATIC=1 to link with -static
 STATIC ?= 1
 
+PKG_CONFIG ?= pkg-config
+
+# Packages needed for the full iiwm (dwm) and iist (st) builds.
+DWM_PKGCONFIG ?= xft
+ST_PKGCONFIG  ?= xft
+
+PKGCONFIG_LIBS_CMD = --libs
+ifeq ($(STATIC),1)
+PKGCONFIG_LIBS_CMD += --static
+endif
+
+DWM_PKGCONFIG_CFLAGS := $(shell $(PKG_CONFIG) --cflags $(DWM_PKGCONFIG) 2>/dev/null)
+DWM_PKGCONFIG_LIBS   := $(shell $(PKG_CONFIG) $(PKGCONFIG_LIBS_CMD) $(DWM_PKGCONFIG) 2>/dev/null)
+ifeq ($(strip $(DWM_PKGCONFIG_CFLAGS)),)
+$(error Xft development files were not found; install libXft headers to build iiwm.)
+endif
+HAVE_HARFBUZZ        := $(shell $(PKG_CONFIG) --exists harfbuzz && echo 1)
+ST_PKGCONFIG_CFLAGS  := $(shell $(PKG_CONFIG) --cflags $(ST_PKGCONFIG) 2>/dev/null)
+ST_PKGCONFIG_LIBS    := $(shell $(PKG_CONFIG) $(PKGCONFIG_LIBS_CMD) $(ST_PKGCONFIG) 2>/dev/null)
+ifeq ($(HAVE_HARFBUZZ),1)
+ST_PKGCONFIG        += harfbuzz
+ST_PKGCONFIG_CFLAGS += $(shell $(PKG_CONFIG) --cflags harfbuzz 2>/dev/null)
+ST_PKGCONFIG_LIBS   += $(shell $(PKG_CONFIG) $(PKGCONFIG_LIBS_CMD) harfbuzz 2>/dev/null)
+else
+$(error Harfbuzz development files were not found; install harfbuzz to build iist.)
+endif
+
 # Include subproject config for flags
 include $(MKFILEDIR)dwm/config.mk
 include $(MKFILEDIR)st/config.mk
+
+CFLAGS   += $(DWM_PKGCONFIG_CFLAGS)
+LIBS     += $(DWM_PKGCONFIG_LIBS)
+STCFLAGS += $(ST_PKGCONFIG_CFLAGS)
+STLDFLAGS += $(ST_PKGCONFIG_LIBS)
 
 # Rename conflicting symbols and mains per project
 DWM_DEFS = -Dmain=dwm_main -Ddie=dwm_die
@@ -30,10 +62,15 @@ ST_DEFS  = -Dmain=st_main  -Ddie=st_die
 
 # Sources per project
 DWM_SRC = \
-  dwm/dwm.c
+  dwm/dwm.c \
+  dwm/drw.c \
+  dwm/util.c
 
 ST_SRC = \
-  st/st.c
+  st/st.c \
+  st/x.c \
+  st/boxdraw.c \
+  st/hb.c
 
 WRAP_SRC = combined/main.c
 
@@ -76,7 +113,7 @@ LDFLAGS_EXTRA += -static
 endif
 
 # Link libs: combine both
-COMBINED_LDLIBS = $(STLDFLAGS_CLEANED) $(LDFLAGS) $(LDFLAGS_EXTRA)
+COMBINED_LDLIBS = $(LIBS_CLEANED) $(STLDFLAGS_CLEANED) $(LDFLAGS) $(LDFLAGS_EXTRA)
 
 .PHONY: all clean install uninstall print-flags deb
 
