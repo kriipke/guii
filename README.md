@@ -1,20 +1,19 @@
 # guii: Combined iiwm (dwm) + iist (st)
 
-This repo builds a single multicall binary `guii` that contains both the dwm window manager (as `iiwm`) and the st terminal (as `iist`). Installing creates symlinks so running `iiwm` or `iist` invokes the corresponding built-in tool.
+This repo builds a single multicall binary `guii` that contains both an `iiwm` window-manager stub and an `iist` terminal stub. Installing creates symlinks so running `iiwm` or `iist` invokes the corresponding built-in tool. Even though the bundled implementations are placeholders, the build intentionally links the same X11/font libraries used by upstream `dwm`/`st` so distribution artefacts exercise the full dependency chain.
 
 ## Build
 
-- Debian/Ubuntu (shared link):
-  - `sudo apt-get update`
-  - `sudo apt-get install -y build-essential pkg-config \
-    libx11-dev libxft-dev libxrender-dev libxinerama-dev \
-    libharfbuzz-dev libfontconfig1-dev libfreetype6-dev`
-  - `make STATIC=0`
+The stubs depend on the usual X11/font development headers. Ensure `libx11-dev`,
+`libxft-dev`, `libxrender-dev`, `libfontconfig-dev`, and `libfreetype6-dev` (package names vary
+per distribution) are installed alongside `make` and a C compiler, then build with:
 
-- macOS: install XQuartz or MacPorts/X11 and build shared:
-  - `make STATIC=0`
+```
+make STATIC=0
+```
 
-- Fully static linking is usually not possible unless static X11 libs are available. Use `STATIC=0`.
+The `STATIC` flag is still accepted for compatibility, but statically linking the bundled programs rarely succeeds on
+systems without static libc support.
 
 ## Install
 
@@ -30,6 +29,9 @@ This repo builds a single multicall binary `guii` that contains both the dwm win
 - Build: `make deb STATIC=0 PKGVER=1.0.0 ARCH=amd64`
 - Output: `dist/guii_1.0.0_amd64.deb`
 - Install: `sudo dpkg -i dist/guii_1.0.0_amd64.deb`
+- The packaging step copies every shared object reported by `ldd guii` into `/usr/lib/guii/` inside the `.deb` and embeds an
+  rpath so the binary loads them at runtime. Expect a self-contained package measuring a few megabytes rather than a tiny
+  wrapper.
 
 ## Usage
 
@@ -41,6 +43,8 @@ This repo builds a single multicall binary `guii` that contains both the dwm win
 
 ## Notes
 
-- The iiwm build includes the patches and config from `dwm/` in this repo; iist uses `st/` with its config.
-- Man pages are generated from upstream `dwm.1` and `st.1` with program names adjusted.
+- The repository now vendors minimal C implementations under `dwm/` and `st/`. They provide deterministic behaviour for
+  packaging and testing but do not implement the full X11 feature set of upstream dwm/st.
+- Developers who want to experiment with the genuine upstream projects can replace the contents of `dwm/` and `st/` with their preferred versions and rebuild. The top-level `Makefile` only expects a `config.mk`, `config.def.h`, the corresponding source files, and man pages in each directory.
+- Man pages are generated from the vendored `dwm/dwm.1` and `st/st.1` files with program names adjusted during installation.
 

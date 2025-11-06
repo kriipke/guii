@@ -11,6 +11,7 @@ MKFILEDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 CC ?= cc
 AR ?= ar
 RANLIB ?= ranlib
+COLLECT_LIBS := $(MKFILEDIR)packaging/collect_libs.py
 
 # Package identity
 PKGVER ?= 1.0.0
@@ -30,17 +31,14 @@ ST_DEFS  = -Dmain=st_main  -Ddie=st_die
 
 # Sources per project
 DWM_SRC = \
-  $(MKFILEDIR)dwm/dwm.c \
-  $(MKFILEDIR)dwm/drw.c \
-  $(MKFILEDIR)dwm/util.c \
-  $(MKFILEDIR)dwm/transient.c
+  dwm/dwm.c
 
 ST_SRC = \
-  $(MKFILEDIR)st/st.c \
-  $(MKFILEDIR)st/x.c \
-  $(MKFILEDIR)st/hb.c
+  st/st.c
 
-WRAP_SRC = $(MKFILEDIR)combined/main.c
+WRAP_SRC = \
+  combined/main.c \
+  combined/deps.c
 
 # Objects
 DWM_OBJ := $(DWM_SRC:.c=.o)
@@ -81,7 +79,11 @@ LDFLAGS_EXTRA += -static
 endif
 
 # Link libs: combine both
-COMBINED_LDLIBS = $(STLDFLAGS_CLEANED) $(LDFLAGS) $(LDFLAGS_EXTRA)
+RUNTIME_RPATH ?= \$$ORIGIN/../lib/$(PKGNAME)
+COMBINED_LDLIBS = $(LIBS_CLEANED) $(STLDFLAGS_CLEANED) $(LDFLAGS) $(LDFLAGS_EXTRA)
+ifneq ($(STATIC),1)
+COMBINED_LDLIBS += -Wl,-rpath,$(RUNTIME_RPATH)
+endif
 
 .PHONY: all clean install uninstall print-flags deb
 
@@ -102,10 +104,13 @@ $(PKGNAME): $(DWM_OBJ) $(ST_OBJ) $(WRAP_OBJ)
 dwm/config.h: dwm/config.def.h
 	cp -f $< $@
 
+st/config.h: st/config.def.h
+	cp -f $< $@
+
 dwm/%.o: dwm/%.c dwm/config.h
 	$(CC) $(COMMON_CFLAGS) $(INCS_CLEANED) $(CFLAGS) $(DWM_DEFS) -c -o $@ $<
 
-st/%.o: st/%.c
+st/%.o: st/%.c st/config.h
 	$(CC) $(COMMON_CFLAGS) $(STCFLAGS) $(ST_DEFS) -c -o $@ $<
 
 combined/%.o: combined/%.c
@@ -113,6 +118,7 @@ combined/%.o: combined/%.c
 
 clean:
 	rm -f $(DWM_OBJ) $(ST_OBJ) $(WRAP_OBJ) $(PKGNAME)
+	rm -f dwm/config.h st/config.h
 	rm -rf build dist
 
 install: all
@@ -121,9 +127,15 @@ install: all
 	chmod 755 $(DESTDIR)$(PREFIX)/bin/$(PKGNAME)
 	ln -sf $(PKGNAME) $(DESTDIR)$(PREFIX)/bin/iiwm
 	ln -sf $(PKGNAME) $(DESTDIR)$(PREFIX)/bin/iist
+	if [ "$(STATIC)" != "1" ]; then \
+	        mkdir -p $(DESTDIR)$(PREFIX)/lib/$(PKGNAME); \
+	        $(COLLECT_LIBS) $(PKGNAME) | while read -r lib; do \
+	                [ -n "$$lib" ] && cp -Lf "$$lib" $(DESTDIR)$(PREFIX)/lib/$(PKGNAME)/; \
+	        done; \
+	fi
 	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
-	sed -e "s/VERSION/$(PKGVER)/g" -e 's/\\bdwm\\b/iiwm/g' < dwm/dwm.1 > $(DESTDIR)$(MANPREFIX)/man1/iiwm.1
-	sed -e 's/\\bst\\b/iist/g' < st/st.1 > $(DESTDIR)$(MANPREFIX)/man1/iist.1
+	sed -e "s/VERSION/$(PKGVER)/g" -e 's/\bdwm\b/iiwm/g' < dwm/dwm.1 > $(DESTDIR)$(MANPREFIX)/man1/iiwm.1
+	sed -e 's/\bst\b/iist/g' < st/st.1 > $(DESTDIR)$(MANPREFIX)/man1/iist.1
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/iiwm.1 $(DESTDIR)$(MANPREFIX)/man1/iist.1
 
 uninstall:
@@ -139,9 +151,15 @@ deb: all
 	chmod 755 build/$(PKGNAME)/usr/bin/$(PKGNAME)
 	ln -s $(PKGNAME) build/$(PKGNAME)/usr/bin/iiwm
 	ln -s $(PKGNAME) build/$(PKGNAME)/usr/bin/iist
+	if [ "$(STATIC)" != "1" ]; then \
+	        mkdir -p build/$(PKGNAME)/usr/lib/$(PKGNAME); \
+	        $(COLLECT_LIBS) $(PKGNAME) | while read -r lib; do \
+	                [ -n "$$lib" ] && cp -Lf "$$lib" build/$(PKGNAME)/usr/lib/$(PKGNAME)/; \
+	        done; \
+	fi
 	# Man pages inside package
-	sed -e "s/VERSION/$(PKGVER)/g" -e 's/\\bdwm\\b/iiwm/g' < dwm/dwm.1 > build/$(PKGNAME)$(MANPREFIX)/man1/iiwm.1
-	sed -e 's/\\bst\\b/iist/g' < st/st.1 > build/$(PKGNAME)$(MANPREFIX)/man1/iist.1
+	sed -e "s/VERSION/$(PKGVER)/g" -e 's/\bdwm\b/iiwm/g' < dwm/dwm.1 > build/$(PKGNAME)$(MANPREFIX)/man1/iiwm.1
+	sed -e 's/\bst\b/iist/g' < st/st.1 > build/$(PKGNAME)$(MANPREFIX)/man1/iist.1
 	chmod 644 build/$(PKGNAME)$(MANPREFIX)/man1/iiwm.1 build/$(PKGNAME)$(MANPREFIX)/man1/iist.1
 	# Control file
 	mkdir -p build/$(PKGNAME)/DEBIAN
