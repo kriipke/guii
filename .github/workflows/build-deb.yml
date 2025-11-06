@@ -19,7 +19,7 @@ jobs:
             libx11-dev libxft-dev libxrender-dev libxinerama-dev \
             libharfbuzz-dev libfontconfig1-dev libfreetype6-dev dpkg-dev
       - name: Build combined binary (shared)
-        run: make STATIC=0
+        run: find . ;make STATIC=0
       - name: Build deb
         run: make deb STATIC=0 PKGVER=${{ github.run_number }} ARCH=amd64
       - name: Upload artifact
