@@ -5,7 +5,6 @@ PREFIX ?= /usr
 MANPREFIX ?= $(PREFIX)/share/man
 DESTDIR ?=
 
-#MKFILEDIR := $(dir $(mkfile_path))
 MKFILEDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 
@@ -22,8 +21,8 @@ ARCH ?= amd64
 STATIC ?= 1
 
 # Include subproject config for flags
-include $(MKFILEDIR)/dwm/config.mk
-include $(MKFILEDIR)/st/config.mk
+include $(MKFILEDIR)dwm/config.mk
+include $(MKFILEDIR)st/config.mk
 
 # Rename conflicting symbols and mains per project
 DWM_DEFS = -Dmain=dwm_main -Ddie=dwm_die
@@ -31,17 +30,17 @@ ST_DEFS  = -Dmain=st_main  -Ddie=st_die
 
 # Sources per project
 DWM_SRC = \
-  dwm/dwm.c \
-  dwm/drw.c \
-  dwm/util.c \
-  dwm/transient.c
+  $(MKFILEDIR)dwm/dwm.c \
+  $(MKFILEDIR)dwm/drw.c \
+  $(MKFILEDIR)dwm/util.c \
+  $(MKFILEDIR)dwm/transient.c
 
 ST_SRC = \
-  st/st.c \
-  st/x.c \
-  st/hb.c
+  $(MKFILEDIR)st/st.c \
+  $(MKFILEDIR)st/x.c \
+  $(MKFILEDIR)st/hb.c
 
-WRAP_SRC = combined/main.c
+WRAP_SRC = $(MKFILEDIR)combined/main.c
 
 # Objects
 DWM_OBJ := $(DWM_SRC:.c=.o)
