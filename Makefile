@@ -5,6 +5,9 @@ PREFIX ?= /usr
 MANPREFIX ?= $(PREFIX)/share/man
 DESTDIR ?=
 
+MKFILEDIR := $(dir $(mkfile_path))
+
+
 CC ?= cc
 AR ?= ar
 RANLIB ?= ranlib
@@ -18,8 +21,8 @@ ARCH ?= amd64
 STATIC ?= 1
 
 # Include subproject config for flags
-include ./dwm/config.mk
-include ./st/config.mk
+include $(MKFILEDIR)/dwm/config.mk
+include $(MKFILEDIR)/st/config.mk
 
 # Rename conflicting symbols and mains per project
 DWM_DEFS = -Dmain=dwm_main -Ddie=dwm_die
