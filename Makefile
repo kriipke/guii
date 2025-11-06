@@ -18,8 +18,8 @@ ARCH ?= amd64
 STATIC ?= 1
 
 # Include subproject config for flags
-include dwm/config.mk
-include st/config.mk
+include ./dwm/config.mk
+include ./st/config.mk
 
 # Rename conflicting symbols and mains per project
 DWM_DEFS = -Dmain=dwm_main -Ddie=dwm_die
