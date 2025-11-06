@@ -1,0 +1,34 @@
+.TH IIST 1 "October 2025" "guii 1.0.0" "User Commands"
+.SH NAME
+iist \- placeholder terminal launcher used by guii
+.SH SYNOPSIS
+.B iist
+.RI [ options ]
+.SH DESCRIPTION
+The
+.B iist
+command included with the guii project is a compact stand-in for the
+suckless
+.BR st (1)
+terminal.  It launches a configurable shell or an explicitly requested
+command so that the multicall binary can be exercised without requiring
+any external source downloads.
+.SH OPTIONS
+.TP
+.BR --help
+Display usage information.
+.TP
+.BR --version
+Print version information for the stub implementation and exit.
+.TP
+.BR -e " " command " " [args...]
+Execute the provided command in place of the default shell.
+.SH FILES
+.TP
+.I config.h
+Generated from
+.I config.def.h
+and contains the shell path and default arguments used by the stub.
+.SH AUTHOR
+The stub terminal launcher was written for the guii project to keep
+package builds fully self-contained.
