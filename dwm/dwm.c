@@ -76,6 +76,7 @@ dwm_main(int argc, char **argv)
             }
             char *end = NULL;
             unsigned long parsed = strtoul(argv[++i], &end, 10);
+            /* Ensure parsed value fits in unsigned int and is nonzero */
             if (!end || *end || parsed == 0 || parsed > UINT_MAX) {
                 fprintf(stderr, "%s: invalid heartbeat interval '%s'\n", argv[0], argv[i]);
                 return 1;
