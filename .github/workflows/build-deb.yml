@@ -20,8 +20,10 @@ jobs:
             libharfbuzz-dev libfontconfig1-dev libfreetype6-dev dpkg-dev
       - name: Build combined binary (shared)
         run: make STATIC=0
-      - name: Build deb
-        run: make deb STATIC=0 PKGVER=${{ github.run_number }} ARCH=amd64
+      - name: Build amd64 deb
+        run: make deb STATIC=1 PKGVER=${{ github.run_number }} ARCH=amd64
+      - name: Build arm64 deb
+        run: make deb STATIC=1 PKGVER=${{ github.run_number }} ARCH=arm64
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
