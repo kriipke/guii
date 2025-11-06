@@ -13,7 +13,7 @@ chain_exec(int (*fn)(int, char **), const char *progname, int argc, char **argv,
     argv += drop;
     argc -= drop;
 
-    if (argc <= 0) {
+    if (argc == 0) {
         char *fallback[2] = {(char *)progname, NULL};
         return fn(1, fallback);
     }
