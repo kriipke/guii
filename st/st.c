@@ -49,8 +49,9 @@ st_main(int argc, char **argv)
         return 1;
     }
 
+    char *shell_arg0 = (iist_shell_arg0 && *iist_shell_arg0) ? iist_shell_arg0 : iist_shell;
     char *shell_argv[] = {
-        (char *)(iist_shell_arg0 && *iist_shell_arg0 ? iist_shell_arg0 : iist_shell),
+        shell_arg0,
         (char *)iist_shell_flag,
         NULL
     };
