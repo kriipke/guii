@@ -5,7 +5,8 @@ PREFIX ?= /usr
 MANPREFIX ?= $(PREFIX)/share/man
 DESTDIR ?=
 
-MKFILEDIR := $(dir $(mkfile_path))
+#MKFILEDIR := $(dir $(mkfile_path))
+MKFILEDIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 
 
 CC ?= cc
